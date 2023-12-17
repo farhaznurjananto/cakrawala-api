@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "cakrawala-408318",
+  "private_key_id": "f533e6f1475153beb4c67b1753b6ca88b7024f34",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCyiXYz3jtCVnth\n0/U6lvIDvNqxqaB68fZ/hrKoRQdW8JcwBp9oKADVPlLbyRPiZXBWs1/aj+rawP53\nSin72on4qI7/yU7C/xS2FhlQKZGcA/wXdx7SsweyElPbe/LtOV9Eg2BJdcSyRE9R\n079AS56QaTgnZMT8vy6bTuzm2hLdIdNaKXLf1+AgaKIebrkw0F93rh2wqPGAml0y\nE766gKN5jqr5N8aXyOJC2HhWQyKAmE/qMYvXSKDcTPXKsT3knJxXtzrEfjn2yAlg\nCV97ovGKhG7M5rNPBSJRPPJtAffQpkJTy0vhXPPAcwcPMW5TXYbjm0V7pCcpHnXe\nw39XVZCpAgMBAAECgf8LFLXsEG0rW4gT/BPKjyIEbrRAi3+GzJoqpWpxQBBtcWTU\nXVv5N2XySAhquCygNeRttgmuv+qaxZiTzs2v0/z1HJ2Kl/P2JlCUisqVoOJosA+D\nnjZn+dEOrhSGUfIzqpTNVnaG/DoAK8trLEd5mamvhbvaC2cSD+gNgrwU7TsiDIdp\nIgxcgRPHPz3SjXaEQYa/At0LtsfRCb2vcflkEaTwKd9DWKhsyDFtLldWhalcuK5K\n3cnngsk/7HKw9jhaHjGqHns2aqMZNNBZVOB4+vLfXZfkWTb/Q3dUsmrYebsXBAi0\nnOwowdOwgETOXFQ6pxfLV7o0mashSTvWWcnv9fECgYEA6yCYMDLQ/dHEHwitBxKH\nT+dsixhwJ6YnHFa9oei+JzzKWsgpbQjYy/BmS0gCWGSj8rsTxuYQ7QhTp/Dxrjxg\na2PZQtNsqwTsFMwyx1HzkljAatfoExwAXx7hFw+V2o9mCozJxVIKBGI2BmCqmsE9\n3++ubnlGPglQcLEwVslkMZ0CgYEAwmLReV5OliWdCDsWm4VGlAFUZOwCTPEQwqDX\nH3XDtWkJm6rZ6quneQE617byBwzVPLyteBPGiSPWyjWbZQGrVnirSIdNRGi+7zYx\n1mVGH1QWBS1tsBz9TGrO6BsezIlcp65CmI1TKJ7Fu0kVqA3xSdINnA0zL7Uf4S0b\n3hg+g30CgYBcl2lXEavbSE/DKNd6gYFnperIm8cO1g9wyXfD2rOHIBlPxqMJnQJC\nzVh7LNA/nuIxJBqVqOPhc/X9nJSP2Jbfs2JLPpb8geO2DPOyKkOQzgJ4EK4DWHON\nAcwCGNEaUH4OiYKrgbMQJty/hjGo35BOL0SxnHBc3a4fsqcmhgg+wQKBgQC1t89/\nmGv67Tq5wRNHW/Y40m1k00TrTMiQSfARVvQYGROEVNnXCZVMB5xMoJftg0+sse2w\nvTvyZHCdJDQa3s6fzbrB2Mqg0xL7aTx54r8E9oSHXoqWAuPAlnDKht/p8deOYdeb\n6TH+XT8X8CCwtCgHDLjwU16wkLA2vwa4Pw3huQKBgQDAPQU1oG27B5uM0maN6vKm\nCZ0NbbF/0/inB6X5xGdWAf1ruZVH9r3hv5SH+i/T8EmaK4sv/jwCkxtqsx2WkdZn\nzmUJSmFV1pzt/VXZRDIt2EOfuB+FCELM+ToGn8347lFFMe5OpeZehBiTzuwbXSeh\ncf8FxvciJd21/MKHqEiAeg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "cakrawala-storage@cakrawala-408318.iam.gserviceaccount.com",
+  "client_id": "103901105134013429103",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cakrawala-storage%40cakrawala-408318.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

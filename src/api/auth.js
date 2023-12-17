@@ -5,6 +5,8 @@ const db = require("../database");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
+// DIUBAH
+
 //* Create Token
 const maxExpire = 3 * 24 * 60 * 60;
 const createToken = (id, username, isPremium) =>

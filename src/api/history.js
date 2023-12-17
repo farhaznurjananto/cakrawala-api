@@ -40,7 +40,8 @@ exports.getHistory = async (req, res) => {
   if (rows.length) {
     const response = res.status(200).send({
       status: "Sukses",
-      message: rows,
+      message: "History found",
+      data: rows,
       pagination: {
         page: page,
         itemsPerPage: itemsPerPage,
@@ -84,11 +85,44 @@ exports.deleteHistory = async (req, res) => {
       await storage.bucket(bucketName).file(processed_filename).delete();
 
       // Delete Sql
+      await db.promise().query(`DELETE FROM results WHERE upload_id = ?`, [rows[0].id]);
       await db.promise().query(`DELETE FROM uploads WHERE id = ?`, [rows[0].id]);
 
       const response = res.status(201).send({
         status: "Sukses",
         message: "Files deleted successfully",
+      });
+
+      return response;
+    } else {
+      const response = res.status(404).send({
+        status: "Gagal",
+        message: "No history found with the given ID",
+      });
+
+      return response;
+    }
+  } catch (error) {
+    console.error(error);
+    const response = res.status(500).send({
+      status: "Gagal",
+      message: "Internal Server Error",
+    });
+
+    return response;
+  }
+};
+
+exports.specificHistory = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const [rows] = await db.promise().query(`SELECT * FROM uploads WHERE id = ?`, [id]);
+
+    if (rows.length) {
+      const response = res.status(201).send({
+        status: "Sukses",
+        message: "History found",
+        data: rows,
       });
 
       return response;

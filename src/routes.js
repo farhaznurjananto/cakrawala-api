@@ -1,10 +1,12 @@
+// DIUBAH
+
 const express = require("express");
 const { requireAuthMember } = require("./middlewares");
 
 const { signupPost, login, logout, sendVerificationEmail, forgotPassword } = require("./api/auth");
 const { upload } = require("./api/uploadFile");
 const { uploadText } = require("./api/uploadText");
-const { getHistory, deleteHistory } = require("./api/history");
+const { getHistory, deleteHistory, specificHistory } = require("./api/history");
 
 const routes = express.Router();
 
@@ -21,6 +23,7 @@ routes.post('/forgot-password', forgotPassword);
 routes.post("/upload", requireAuthMember, upload);
 routes.post("/uploadText", requireAuthMember, uploadText);
 routes.get("/history", requireAuthMember, getHistory);
+routes.get("/history/:id", requireAuthMember, specificHistory);
 routes.delete("/history/:id", requireAuthMember, deleteHistory);
 // test
 // Example route handler

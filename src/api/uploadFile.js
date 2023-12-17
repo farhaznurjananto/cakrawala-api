@@ -11,8 +11,10 @@ const vision = require("@google-cloud/vision").v1;
 const client = new vision.ImageAnnotatorClient();
 const axios = require("axios");
 const crypto = require("crypto");
-// db
 
+// DIUBAH
+
+// db
 const db = require("../database");
 require("dotenv").config();
 
@@ -268,10 +270,20 @@ exports.upload = async (req, res) => {
 
         const httpTextPublicUrl = `http://storage.googleapis.com/${bucket.name}/${outputPrefix}/${outputFileName}output-1-to-${countPage}.json`;
         textPublicUrl = `gs://${bucket.name}/${outputPrefix}/${outputFileName}output-1-to-${countPage}.json`;
-        outputFileName = `${fileName}_text-output-1-to-${countPage}.json`;
+        outputFileName = `${fileName}_textoutput-1-to-${countPage}.json`;
 
         // ectracted text mau gimana soalnya udah bisa 2 halaman
         extractedText = jsonData.responses[0].fullTextAnnotation.text;
+
+        try {
+          // Make the object public
+          await storage.bucket(process.env.BUCKET_NAME).file(`${folderUpload}/${fileName}`).makePublic();
+
+          // res.status(200).send(`Object ${objectName} in bucket ${bucketName} is now public.`);
+        } catch (error) {
+          console.error(error);
+          // res.status(500).send('Internal Server Error');
+        }
 
         // Filter file included text under 2000 char
         extractedText = extractedText.replace(/\n/g, " ");
@@ -288,7 +300,7 @@ exports.upload = async (req, res) => {
         try {
           const response = await axios.post("http://127.0.0.1:5003/predict", { data: extractedText });
           prediction = response.data.prediction;
-          console.log(prediction);
+          // console.log(prediction);
           // res.json({ prediction });
         } catch (error) {
           // console.log(error.message);
@@ -300,7 +312,7 @@ exports.upload = async (req, res) => {
         const resultId = crypto.randomInt(10000000);
         const uploadId = crypto.randomInt(10000000);
         // Database
-        await db.promise().query(`INSERT INTO uploads (id, raw_file, raw_filename, processed_file, processed_filename, user_id) VALUES(?, ?, ?, ?, ?, ?)`, [uploadId, publicUrl, fileName, textPublicUrl, outputFileName, id]);
+        await db.promise().query(`INSERT INTO uploads (id, raw_file, raw_filename, processed_file, processed_filename, user_id) VALUES(?, ?, ?, ?, ?, ?)`, [uploadId, httpPublicUrl, fileName, httpTextPublicUrl, outputFileName, id]);
 
         list_ai_sentences = JSON.stringify(prediction.list_ai_sentences);
 
