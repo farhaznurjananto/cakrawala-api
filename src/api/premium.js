@@ -65,14 +65,14 @@ exports.buyPremium = async (req, res) => {
     console.log(order_id);
     // forward to endpoint midtrans
     try {
-        redirectPayment = await axios.post(`${process.env.URL_MODEL}/charge`, data, {
-      // const redirectPayment = await axios.post(`http://127.0.0.1:5003/charge`, data, {
+      // redirectPayment = await axios.post(`${process.env.URL_MODEL}/charge`, data, {
+      const redirectPayment = await axios.post(`http://127.0.0.1:5003/charge`, data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      await db.promise().query(`INSERT INTO orders (id, premium_id, url_payment, user_id) VALUES(?, ?, ?, ?)`, [order_id, premium_id, redirectPayment.data.redirect_url, id]);
+      await db.promise().query(`INSERT INTO orders (id, premium_id, transaction_id, url_payment, user_id) VALUES(?, ?, ?, ?, ?)`, [order_id, premium_id, redirectPayment.data.token, redirectPayment.data.redirect_url, id]);
 
       res.status(200).json({
         status: "Sukses",
@@ -150,7 +150,7 @@ exports.detailPayment = async (req, res) => {
 
 // URL CALLBACK HANDLER {url}/payment-handler
 exports.paymentHandler = async (req, res) => {
-  const id = jwtDecoded(req.cookies.jwt);
+  // const id = jwtDecoded(req.cookies.jwt);
   // check status trans
   // add data in table order
   try {
@@ -166,10 +166,13 @@ exports.paymentHandler = async (req, res) => {
 
     const data = bill.data;
 
+    console.log(data);
+
+    const [id] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, req.query.order_id);
+
     await db.promise().query(
       `UPDATE orders SET transaction_time = ?,
       transaction_status = ?,
-      transaction_id = ?,
       status_message = ?,
       status_code = ?,
       signature_key = ?,
@@ -178,7 +181,7 @@ exports.paymentHandler = async (req, res) => {
       gross_amount = ?,
       fraud_status = ?,
       currency = ? WHERE id = ?`,
-      [data.transaction_time, data.transaction_status, data.transaction_id, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency]
+      [data.transaction_time, data.transaction_status, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency]
     );
 
     // update table premium
