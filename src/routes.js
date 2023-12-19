@@ -7,7 +7,7 @@ const { signupPost, login, logout } = require("./api/auth");
 const { upload } = require("./api/uploadFile");
 const { uploadText } = require("./api/uploadText");
 const { getHistory, deleteHistory, specificHistory } = require("./api/history");
-const { getPremiumList, buyPremium, premiumHistoryAll, detailPayment, paymentHandler } = require("./api/premium");
+const { getPremiumList, buyPremium, premiumHistoryAll, detailPayment, paymentHandler, redirectPaymentHandler } = require("./api/premium");
 
 const routes = express.Router();
 
@@ -32,5 +32,6 @@ routes.post("/premium/:id", requireAuthMember, buyPremium);
 routes.get("/transactions", requireAuthMember, premiumHistoryAll);
 routes.post("/transactions/:id", requireAuthMember, detailPayment);
 routes.post("/payment-handler", paymentHandler);
+routes.get("/payment-handler", redirectPaymentHandler);
 
 module.exports = routes;

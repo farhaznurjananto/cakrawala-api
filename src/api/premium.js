@@ -148,6 +148,28 @@ exports.detailPayment = async (req, res) => {
   }
 };
 
+exports.redirectPaymentHandler = async (req, res) => {
+  if (req.query.transaction_status == "settlement") {
+    try {
+      const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, req.query.order_id);
+
+      const token = createToken(rows.user_id, rows.username, 1);
+      console.log(token);
+      res.cookie("jwt", token, { httpOnly: false, maxAge: maxExpire * 1000 });
+      res.redirect("/payment-success?jwt=" + token);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({
+        message: "Transaction Invalid",
+      });
+    }
+  } else {
+    res.status(400).json({
+      message: "Transaction Invalid",
+    });
+  }
+};
+
 // URL CALLBACK HANDLER {url}/payment-handler
 exports.paymentHandler = async (req, res) => {
   // const id = jwtDecoded(req.cookies.jwt);
@@ -162,13 +184,10 @@ exports.paymentHandler = async (req, res) => {
     //   },
     // });
 
-    const bill = req.body;
-
-    const data = bill.data;
-
+    const data = req.body;
     console.log(data);
 
-    const [id] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, req.query.order_id);
+    const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, data.order_id);
 
     await db.promise().query(
       `UPDATE orders SET transaction_time = ?,
@@ -185,7 +204,7 @@ exports.paymentHandler = async (req, res) => {
     );
 
     // update table premium
-    const [user_premium] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [id]);
+    const [user_premium] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows.user_id]);
     if (user_premium) {
       await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [premium_id, transaction_time, id]);
     } else {
@@ -193,26 +212,18 @@ exports.paymentHandler = async (req, res) => {
     }
 
     // update user premium status
-    await db.promise().query(`UPDATE users SET premium = 1 WHERE id = ?`, [id]);
+    await db.promise().query(`UPDATE users SET premium = 1 WHERE id = ?`, [rows.user_id]);
 
     // update cookies premium value
-    try {
-      const token = createToken(id, req.user.uname, 1);
-      res.cookie("jwt", token, { httpOnly: false, maxAge: maxExpire * 1000 });
-    } catch (error) {
-      console.log(error);
-    }
 
-    res.redirect("/payment-success");
-
-    // res.status(200).json({
-    //   status: "Sukses",
-    //   message: "Pembayaran berhasil",
-    //   data: {
-    //     url_payment: tokenPayment.data,
-    //     detail: { ...data },
-    //   }, // Use bill.data to get the response data
-    // });
+    res.status(200).json({
+      status: "Sukses",
+      message: "Pembayaran berhasil",
+      data: {
+        url_payment: tokenPayment.data,
+        detail: { ...data },
+      }, // Use bill.data to get the response data
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
