@@ -2,7 +2,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../database");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+const moment = require("moment");
 require("dotenv").config();
 
 // DIUBAH
@@ -90,7 +91,19 @@ exports.login = async (req, res) => {
 
   const [rows] = await db.promise().query(`SELECT * FROM users WHERE email = ?`, [req.body.email]);
   if (rows.length !== 0) {
-    const auth = bcrypt.compare(password, rows[0].password);
+    if (rows[0].premium == 1) {
+      const [data] = await db.promise().query(`SELECT user_premiums.premium_at, premiums.durasi FROM user_premiums JOIN premiums WHERE user_id = ?`, [rows[0].id]);
+      const timestampAwal = moment(data[0].premium_at);
+      const timestampAkhir = timestampAwal.add(data[0].durasi, "days");
+
+      if (moment().isAfter(timestampAkhir)) {
+        // Lakukan sesuatu jika melebihi waktu sekarang
+        rows[0].premium = 0;
+        await db.promise().query(`UPDATE users SET premium = ? WHERE email = ?`, [rows[0].premium, req.body.email]);
+      }
+    }
+    const password = req.body.password; // Assuming you have req.body.password defined
+    const auth = await bcrypt.compare(password, rows[0].password);
     if (auth) {
       const token = createToken(rows[0].id, rows[0].username, rows[0].premium);
       res.cookie("jwt", token, { httpOnly: false, maxAge: maxExpire * 1000 });
@@ -105,10 +118,8 @@ exports.login = async (req, res) => {
       });
       return response;
     }
-    const response = res.status(404).json({ message: "Password salah!" });
-    return response;
   }
-  const response = res.status(404).json({ message: "Email tidak ditemukan!" });
+  const response = res.status(404).json({ message: "Password salah!" });
   return response;
 };
 
@@ -119,77 +130,77 @@ exports.logout = (req, res) => {
   return response;
 };
 
-// Forgot Password
-exports.sendVerificationEmail = (req, res) => {
-  // Logic for sending verification email
-  const { email } = req.body;
+// // Forgot Password
+// exports.sendVerificationEmail = (req, res) => {
+//   // Logic for sending verification email
+//   const { email } = req.body;
 
-  // Create a nodemailer transporter using your email service credentials
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "yagura098@gmail.com", // Your email address
-      pass: "wbjs xqyj qxza yzcz", // Your email password
-    },
-  });
+//   // Create a nodemailer transporter using your email service credentials
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: "-", // Your email address
+//       pass: "-", // Your email password
+//     },
+//   });
 
-  // Use localhost URL for testing
-  const localhostUrl = "http://localhost:8080"; // Replace with your actual localhost URL and port
+//   // Use localhost URL for testing
+//   const localhostUrl = ""; // Replace with your actual localhost URL and port
 
-  // Email options
-  const mailOptions = {
-    from: "yagura098@gmail.com", // Sender email address
-    to: email,
-    subject: "Email Verification",
-    text: `Please click on the following link to verify your email: ${localhostUrl}/verify?token=verificationToken`,
-    // You would generate the verification token and include it in the link
-  };
+//   // Email options
+//   const mailOptions = {
+//     from: "-", // Sender email address
+//     to: email,
+//     subject: "Email Verification",
+//     text: `Please click on the following link to verify your email: ${localhostUrl}/verify?token=verificationToken`,
+//     // You would generate the verification token and include it in the link
+//   };
 
-  // Send email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to send verification email" });
-    } else {
-      console.log("Email sent: " + info.response);
-      res.json({ message: "Verification email sent successfully" });
-    }
-  });
-};
+//   // Send email
+//   transporter.sendMail(mailOptions, (error, info) => {
+//     if (error) {
+//       console.error(error);
+//       res.status(500).json({ error: "Failed to send verification email" });
+//     } else {
+//       console.log("Email sent: " + info.response);
+//       res.json({ message: "Verification email sent successfully" });
+//     }
+//   });
+// };
 
-exports.forgotPassword = (req, res) => {
-  // Logic for handling forgot password
-  const { email } = req.body;
+// exports.forgotPassword = (req, res) => {
+//   // Logic for handling forgot password
+//   const { email } = req.body;
 
-  // Create a nodemailer transporter using your email service credentials
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "yagura098@gmail.com", // Your email address
-      pass: "wbjs xqyj qxza yzcz", // Your email password
-    },
-  });
+//   // Create a nodemailer transporter using your email service credentials
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: "-", // Your email address
+//       pass: "wbjs xqyj qxza yzcz", // Your email password
+//     },
+//   });
 
-  // Use localhost URL for testing
-  const localhostUrl = "http://localhost:8080"; // Replace with your actual localhost URL and port
+//   // Use localhost URL for testing
+//   const localhostUrl = "http://localhost:8080"; // Replace with your actual localhost URL and port
 
-  // Email options
-  const mailOptions = {
-    from: "yagura098@gmail.com", // Sender email address
-    to: email,
-    subject: "Password Reset",
-    text: `Please click on the following link to reset your password: ${localhostUrl}/reset?token=resetToken`,
-    // You would generate the reset token and include it in the link
-  };
+//   // Email options
+//   const mailOptions = {
+//     from: "-", // Sender email address
+//     to: email,
+//     subject: "Password Reset",
+//     text: `Please click on the following link to reset your password: ${localhostUrl}/reset?token=resetToken`,
+//     // You would generate the reset token and include it in the link
+//   };
 
-  // Send email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to send password reset instructions" });
-    } else {
-      console.log("Email sent: " + info.response);
-      res.json({ message: "Password reset instructions sent to your email" });
-    }
-  });
-};
+//   // Send email
+//   transporter.sendMail(mailOptions, (error, info) => {
+//     if (error) {
+//       console.error(error);
+//       res.status(500).json({ error: "Failed to send password reset instructions" });
+//     } else {
+//       console.log("Email sent: " + info.response);
+//       res.json({ message: "Password reset instructions sent to your email" });
+//     }
+//   });
+// };

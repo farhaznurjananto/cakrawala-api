@@ -148,7 +148,7 @@ exports.upload = async (req, res) => {
 
         var prediction;
         try {
-          const response = await axios.post("http://127.0.0.1:5003/predict", { data: extractedText });
+          const response = await axios.post(`${process.env.URL_MODEL}/predict`, { data: extractedText });
           prediction = response.data.prediction;
           // console.log(prediction);
           // res.json({ prediction });
@@ -298,7 +298,7 @@ exports.upload = async (req, res) => {
         // Predict
         var prediction;
         try {
-          const response = await axios.post("http://127.0.0.1:5003/predict", { data: extractedText });
+          const response = await axios.post(`${process.env.URL_MODEL}/predict`, { data: extractedText });
           prediction = response.data.prediction;
           // console.log(prediction);
           // res.json({ prediction });

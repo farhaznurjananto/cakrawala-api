@@ -15,7 +15,7 @@ const requireAuthMember = (req, res, next) => {
     }
 
     // Attach id and isPremium to the req object
-    req.user = { id: decodedToken.id, isPremium: decodedToken.isPremium };
+    req.user = { id: decodedToken.id, uname: decodedToken.username, isPremium: decodedToken.isPremium };
 
     return next();
   });

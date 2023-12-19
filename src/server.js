@@ -4,6 +4,7 @@ const express = require("express");
 const routes = require("./routes");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 const PORT = 8080;
@@ -17,6 +18,8 @@ app.use(
     extended: true,
   })
 );
+
+app.use(express.static("public"));
 
 // Routes
 app.use(routes);
@@ -38,5 +41,5 @@ app.listen(PORT, () => {
 // Nambah tabel buat paket premium dan durasi
 // Urusan PDF (nama file gabisa di custom, masih belom  bisa akses json) (done)
 // yang delete history yang pdf masih salah karna filenamenya masih belum ada solusi (done)
-// Mengganti tipe data menjadi bentuk teks langsung 
+// Mengganti tipe data menjadi bentuk teks langsung
 // Delete History error - bagian hapus pdf karena simpan link pakai gs ganti ke https (done)

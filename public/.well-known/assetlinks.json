@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bangkit.cakrawala",
+      "sha256_cert_fingerprints": ["9D:C2:ED:E3:0A:4B:F9:5C:2E:CF:A6:90:E8:65:3D:32:7B:81:F5:6C:9F:37:91:A3:0E:E4:A1:2B:B9:24:C6:0F"]
+    }
+  }
+]
