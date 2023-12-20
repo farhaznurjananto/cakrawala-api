@@ -151,9 +151,9 @@ exports.detailPayment = async (req, res) => {
 exports.redirectPaymentHandler = async (req, res) => {
   if (req.query.transaction_status == "settlement") {
     try {
-      const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, req.query.order_id);
+      const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, [req.query.order_id]);
 
-      const token = createToken(rows.user_id, rows.username, 1);
+      const token = createToken(rows[0].user_id, rows[0].username, 1);
       console.log(token);
       res.cookie("jwt", token, { httpOnly: false, maxAge: maxExpire * 1000 });
       res.redirect("/payment-success?jwt=" + token);
@@ -187,7 +187,7 @@ exports.paymentHandler = async (req, res) => {
     const data = req.body;
     console.log(data);
 
-    const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, data.order_id);
+    const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, [data.order_id]);
 
     await db.promise().query(
       `UPDATE orders SET transaction_time = ?,
@@ -200,19 +200,19 @@ exports.paymentHandler = async (req, res) => {
       gross_amount = ?,
       fraud_status = ?,
       currency = ? WHERE id = ?`,
-      [data.transaction_time, data.transaction_status, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency]
+      [data.transaction_time, data.transaction_status, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency, data.order_id]
     );
 
     // update table premium
-    const [user_premium] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows.user_id]);
+    const [user_premium] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows[0].user_id]);
     if (user_premium) {
-      await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [premium_id, transaction_time, id]);
+      await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [rows[0].premium_id, data.transaction_time, rows[0].user_id]);
     } else {
-      await db.promise().query(`INSERT INTO user_premiums (user_id, premium_id, premium_at) VALUES(?, ?, ?)`, [id, premium_id, data.transaction_time]);
+      await db.promise().query(`INSERT INTO user_premiums (user_id, premium_id, premium_at) VALUES(?, ?, ?)`, [rows[0].id, rows[0].premium_id, data.transaction_time]);
     }
 
     // update user premium status
-    await db.promise().query(`UPDATE users SET premium = 1 WHERE id = ?`, [rows.user_id]);
+    await db.promise().query(`UPDATE users SET premium = 1 WHERE id = ?`, [rows[0].user_id]);
 
     // update cookies premium value
 
@@ -220,7 +220,7 @@ exports.paymentHandler = async (req, res) => {
       status: "Sukses",
       message: "Pembayaran berhasil",
       data: {
-        url_payment: tokenPayment.data,
+        url_payment: rows[0].url_payment,
         detail: { ...data },
       }, // Use bill.data to get the response data
     });
