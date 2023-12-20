@@ -113,6 +113,7 @@ exports.login = async (req, res) => {
         data: {
           user_id: rows[0].id,
           username: rows[0].username,
+          premium: rows[0].premium,
           token: token,
         },
       });

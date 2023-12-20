@@ -185,7 +185,6 @@ exports.paymentHandler = async (req, res) => {
     // });
 
     const data = req.body;
-    console.log(data);
 
     const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, [data.order_id]);
 
@@ -203,12 +202,15 @@ exports.paymentHandler = async (req, res) => {
       [data.transaction_time, data.transaction_status, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency, data.order_id]
     );
 
-    // update table premium
-    const [user_premium] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows[0].user_id]);
-    if (user_premium) {
-      await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [rows[0].premium_id, data.transaction_time, rows[0].user_id]);
+    // Update table premium
+    const [userPremiumRows] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows[0].user_id]);
+
+    if (userPremiumRows.length === 0) {
+      // Insert new record
+      await db.promise().query(`INSERT INTO user_premiums (user_id, premium_id, premium_at) VALUES (?, ?, ?)`, [rows[0].user_id, rows[0].premium_id, data.transaction_time]);
     } else {
-      await db.promise().query(`INSERT INTO user_premiums (user_id, premium_id, premium_at) VALUES(?, ?, ?)`, [rows[0].id, rows[0].premium_id, data.transaction_time]);
+      // Update existing record
+      await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [rows[0].premium_id, data.transaction_time, rows[0].user_id]);
     }
 
     // update user premium status
@@ -227,6 +229,13 @@ exports.paymentHandler = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+exports.paymentSuccess = async (req, res) => {
+  res.status(200).json({
+    status: "Sukses",
+    message: "Pembayaran berhasil",
+  });
 };
 
 // yuk yuk mulai dari mana asekkkk!!!
