@@ -15,12 +15,6 @@ routes.post("/register", signupPost);
 routes.post("/login", login);
 routes.post("/logout", logout);
 
-// Email verification route
-// routes.post("/verify-email", sendVerificationEmail);
-
-// Forgot password route
-// routes.post("/forgot-password", forgotPassword);
-
 routes.post("/upload", requireAuthMember, upload);
 routes.post("/uploadText", requireAuthMember, uploadText);
 routes.get("/history", requireAuthMember, getHistory);

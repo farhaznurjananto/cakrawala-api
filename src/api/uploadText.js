@@ -9,35 +9,26 @@ const { response } = require("express");
 const axios = require("axios");
 const crypto = require("crypto");
 
-// BERUBAH
-
-// function decoded
 function jwtDecoded(reqCookie) {
-  // jwt decode
   const token = reqCookie;
   let id;
   jwt.verify(token, process.env.SECRET_STRING, (err, decoded) => {
     if (err) {
-      // Use return res.status(401).json(...) if you have 'res' available here
-      // Otherwise, handle the error accordingly
       console.error("Failed to authenticate token", err);
       return;
     }
 
-    // The decoded payload is available in the 'decoded' object
     id = decoded.id;
   });
   return id;
 }
 
-// Function to generate a unique filename
 function generateUniqueFileName() {
   const timestamp = new Date().toISOString().replace(/[^a-zA-Z0-9]/g, "");
   const uniqueName = `${timestamp}`;
   return uniqueName;
 }
 
-// Function premium checking
 function premiumCheck(premium) {
   if (premium.isPremium == 1) {
     return 1;
@@ -48,9 +39,6 @@ function premiumCheck(premium) {
 exports.uploadText = async (req, res) => {
   try {
     var { text } = req.body;
-    // console.log(text);
-    // const user = req.user;
-    // logic premium
     var resCharLength;
     if (!premiumCheck(req.user)) {
       const MAX_CHAR = 2000;
@@ -69,7 +57,6 @@ exports.uploadText = async (req, res) => {
       });
     }
 
-    // Generate unique name
     const fileName = `${generateUniqueFileName()}.txt`;
 
     const folderUpload = "uploads";
@@ -79,23 +66,17 @@ exports.uploadText = async (req, res) => {
     const publicUrl = format(`https://storage.googleapis.com/${destinationUpload}`);
     const textPublicUrl = format(`https://storage.googleapis.com/${destinationOutput}`);
 
-    // Write to txt file
     fs.writeFileSync(fileName, text);
 
-    // Upload file to Google Cloud Storage
     try {
-      // Upload file to Google Cloud Storage
       await bucket.upload(`${fileName}`, {
         destination: destinationUpload,
       });
 
-      // Copy file uploaded before to folder results
       await bucket.file(destinationUpload).copy(destinationOutput);
 
-      // Delete local file
       fs.unlinkSync(fileName);
     } catch (error) {
-      // Handle the error here
       console.error("Error during file upload or deletion:", error);
       return res.status(500).json({
         status: "Error",
@@ -103,37 +84,23 @@ exports.uploadText = async (req, res) => {
       });
     }
 
-    // Predict
     var prediction;
     try {
       const response = await axios.post(`${process.env.URL_MODEL}/predict`, { data: text });
       prediction = response.data.prediction;
       console.log(prediction);
-      // res.json({ prediction });
     } catch (error) {
-      // console.log(error.message);
       res.json({ error: error.message });
     }
 
-    // jwt
     id = jwtDecoded(req.cookies.jwt);
 
     const resultId = crypto.randomInt(10000000);
     const uploadId = crypto.randomInt(10000000);
-    // Database
+
     await db.promise().query(`INSERT INTO uploads (id, raw_file, raw_filename, processed_file, processed_filename, user_id) VALUES(?, ?, ?, ?, ?, ?)`, [uploadId, publicUrl, fileName, fileName, fileName, id]);
 
-    // console.log(await db.promise().query("SELECT LAST_INSERT_ID()"));
-    // last_id = await db.promise().query("SELECT LAST_INSERT_ID()");
-    // last_id = last_id[0][0]["LAST_INSERT_ID()"];
-    // isIdExist = await db.promise().query("SELECT id from uploads where id = ?", [resultId])
-    // // console.log(last_id[0][0]["LAST_INSERT_ID()"]);
-    // if (isIdExist){
-    //   const resultId = crypto.randomUUID()
-    // }
-
     list_ai_sentences = JSON.stringify(prediction.list_ai_sentences);
-    // console.log(list_ai_sentences);
 
     await db
       .promise()

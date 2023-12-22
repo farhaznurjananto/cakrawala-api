@@ -13,7 +13,6 @@ const createToken = (id, username, isPremium) =>
   });
 
 function jwtDecoded(reqCookie) {
-  // jwt decode
   const token = reqCookie;
   var id;
   jwt.verify(token, process.env.SECRET_STRING, (err, decoded) => {
@@ -21,7 +20,6 @@ function jwtDecoded(reqCookie) {
       return res.status(401).json({ message: "Failed to authenticate token" });
     }
 
-    // The decoded payload is available in the 'decoded' object
     id = decoded.id;
   });
   return id;
@@ -43,17 +41,12 @@ exports.getPremiumList = async (req, res) => {
   });
 };
 
-// tuku -> generate -> tabel transaksi
-// detail transaksi -> semua hasil transaksi dari tabel transaksi
-
 exports.buyPremium = async (req, res) => {
-  // check premium status
   if (!premiumCheck(req.user)) {
     const id = jwtDecoded(req.cookies.jwt);
     const premium_id = req.params.id;
     const order_id = crypto.randomInt(10000000);
 
-    // get data premium specific
     const [rows] = await db.promise().query(`SELECT * FROM premiums where id = ?`, premium_id);
 
     const data = JSON.stringify({
@@ -63,10 +56,8 @@ exports.buyPremium = async (req, res) => {
       },
     });
     console.log(order_id);
-    // forward to endpoint midtrans
     try {
-      // redirectPayment = await axios.post(`${process.env.URL_MODEL}/charge`, data, {
-      const redirectPayment = await axios.post(`http://127.0.0.1:5003/charge`, data, {
+      redirectPayment = await axios.post(`${process.env.URL_MODEL}/charge`, data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -77,7 +68,7 @@ exports.buyPremium = async (req, res) => {
       res.status(200).json({
         status: "Sukses",
         message: "Premium List",
-        data: { order_id, ...redirectPayment.data }, // Use bill.data to get the response data
+        data: { order_id, ...redirectPayment.data },
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -93,8 +84,8 @@ exports.buyPremium = async (req, res) => {
 exports.premiumHistoryAll = async (req, res) => {
   const id = jwtDecoded(req.cookies.jwt);
 
-  const page = parseInt(req.query.page) || 1; // Default to page 1 if not specified
-  const itemsPerPage = parseInt(req.query.itemsPerPage) || 10; // Default to 10 items per page if not specified
+  const page = parseInt(req.query.page) || 1;
+  const itemsPerPage = parseInt(req.query.itemsPerPage) || 10;
 
   const offset = (page - 1) * itemsPerPage;
 
@@ -112,7 +103,7 @@ exports.premiumHistoryAll = async (req, res) => {
     res.status(200).json({
       status: "Sukses",
       message: "History List",
-      data: rows, // Use bill.data to get the response data
+      data: rows,
     });
   } else {
     res.status(401).json({
@@ -122,7 +113,6 @@ exports.premiumHistoryAll = async (req, res) => {
   }
 };
 
-// detail stroke
 exports.detailPayment = async (req, res) => {
   const order_id = req.params.id;
 
@@ -138,7 +128,7 @@ exports.detailPayment = async (req, res) => {
     res.status(200).json({
       status: "Sukses",
       message: "History List",
-      data: rows, // Use bill.data to get the response data
+      data: rows,
     });
   } else {
     res.status(401).json({
@@ -170,20 +160,8 @@ exports.redirectPaymentHandler = async (req, res) => {
   }
 };
 
-// URL CALLBACK HANDLER {url}/payment-handler
 exports.paymentHandler = async (req, res) => {
-  // const id = jwtDecoded(req.cookies.jwt);
-  // check status trans
-  // add data in table order
   try {
-    // const bill = await axios.get(`https://api.sandbox.midtrans.com/v2/${order_id}/status`, {
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "application/json",
-    //     Authorization: btoa(process.env.SERVER_KEY_MIDTRANS + ":"),
-    //   },
-    // });
-
     const data = req.body;
 
     const [rows] = await db.promise().query(`SELECT * FROM orders INNER JOIN users ON orders.user_id = users.id WHERE orders.id = ?`, [data.order_id]);
@@ -202,21 +180,16 @@ exports.paymentHandler = async (req, res) => {
       [data.transaction_time, data.transaction_status, data.status_message, data.status_code, data.signature_key, data.payment_type, data.merchant_id, data.gross_amount, data.fraud_status, data.currency, data.order_id]
     );
 
-    // Update table premium
     const [userPremiumRows] = await db.promise().query(`SELECT * FROM user_premiums WHERE user_id = ?`, [rows[0].user_id]);
 
     if (userPremiumRows.length === 0) {
-      // Insert new record
       await db.promise().query(`INSERT INTO user_premiums (user_id, premium_id, premium_at) VALUES (?, ?, ?)`, [rows[0].user_id, rows[0].premium_id, data.transaction_time]);
     } else {
       // Update existing record
       await db.promise().query(`UPDATE user_premiums SET premium_id = ?, premium_at = ? WHERE user_id = ?`, [rows[0].premium_id, data.transaction_time, rows[0].user_id]);
     }
 
-    // update user premium status
     await db.promise().query(`UPDATE users SET premium = 1 WHERE id = ?`, [rows[0].user_id]);
-
-    // update cookies premium value
 
     res.status(200).json({
       status: "Sukses",
@@ -224,7 +197,7 @@ exports.paymentHandler = async (req, res) => {
       data: {
         url_payment: rows[0].url_payment,
         detail: { ...data },
-      }, // Use bill.data to get the response data
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -237,5 +210,3 @@ exports.paymentSuccess = async (req, res) => {
     message: "Pembayaran berhasil",
   });
 };
-
-// yuk yuk mulai dari mana asekkkk!!!

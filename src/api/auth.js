@@ -1,12 +1,8 @@
-// const { nanoid } = require('nanoid');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../database");
-// const nodemailer = require("nodemailer");
 const moment = require("moment");
 require("dotenv").config();
-
-// DIUBAH
 
 //* Create Token
 const maxExpire = 3 * 24 * 60 * 60;
@@ -18,8 +14,6 @@ const createToken = (id, username, isPremium) =>
 //* Register
 exports.signupPost = async (req, res) => {
   const { username, email, password } = req.body;
-
-  // const id = nanoid(16);
 
   if (!email || !password) {
     const response = res.send({
@@ -97,7 +91,6 @@ exports.login = async (req, res) => {
       const timestampAkhir = timestampAwal.add(data[0].durasi, "days");
 
       if (moment().isAfter(timestampAkhir)) {
-        // Lakukan sesuatu jika melebihi waktu sekarang
         rows[0].premium = 0;
         await db.promise().query(`UPDATE users SET premium = ? WHERE email = ?`, [rows[0].premium, req.body.email]);
       }
@@ -130,78 +123,3 @@ exports.logout = (req, res) => {
   const response = res.status(200).json({ message: "Logout sukses!" });
   return response;
 };
-
-// // Forgot Password
-// exports.sendVerificationEmail = (req, res) => {
-//   // Logic for sending verification email
-//   const { email } = req.body;
-
-//   // Create a nodemailer transporter using your email service credentials
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: "-", // Your email address
-//       pass: "-", // Your email password
-//     },
-//   });
-
-//   // Use localhost URL for testing
-//   const localhostUrl = ""; // Replace with your actual localhost URL and port
-
-//   // Email options
-//   const mailOptions = {
-//     from: "-", // Sender email address
-//     to: email,
-//     subject: "Email Verification",
-//     text: `Please click on the following link to verify your email: ${localhostUrl}/verify?token=verificationToken`,
-//     // You would generate the verification token and include it in the link
-//   };
-
-//   // Send email
-//   transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       console.error(error);
-//       res.status(500).json({ error: "Failed to send verification email" });
-//     } else {
-//       console.log("Email sent: " + info.response);
-//       res.json({ message: "Verification email sent successfully" });
-//     }
-//   });
-// };
-
-// exports.forgotPassword = (req, res) => {
-//   // Logic for handling forgot password
-//   const { email } = req.body;
-
-//   // Create a nodemailer transporter using your email service credentials
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: "-", // Your email address
-//       pass: "wbjs xqyj qxza yzcz", // Your email password
-//     },
-//   });
-
-//   // Use localhost URL for testing
-//   const localhostUrl = "http://localhost:8080"; // Replace with your actual localhost URL and port
-
-//   // Email options
-//   const mailOptions = {
-//     from: "-", // Sender email address
-//     to: email,
-//     subject: "Password Reset",
-//     text: `Please click on the following link to reset your password: ${localhostUrl}/reset?token=resetToken`,
-//     // You would generate the reset token and include it in the link
-//   };
-
-//   // Send email
-//   transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       console.error(error);
-//       res.status(500).json({ error: "Failed to send password reset instructions" });
-//     } else {
-//       console.log("Email sent: " + info.response);
-//       res.json({ message: "Password reset instructions sent to your email" });
-//     }
-//   });
-// };
