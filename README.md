@@ -12,7 +12,7 @@ GCP services used:
 
 ## GCP architecture
 
-![GCP architecture](Doc/GCloudArchitecture.png)
+![GCP architecture](docs/GCloudArchitecture.png)
 
 ## Set environment variables and enable services
 
